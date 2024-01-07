@@ -12,7 +12,10 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@tanstack/vue-query": "^5.17.7",
+    "@tanstack/vue-query-devtools": "^5.17.7",
     "@vee-validate/yup": "^4.12.4",
+    "axios": "^1.6.5",
     "pinia": "^2.1.7",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
