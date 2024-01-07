@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query'
+import { QueryClient } from '@tanstack/vue-query'
 import axios, { AxiosError } from 'axios'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
@@ -9,16 +9,23 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import { toTypedSchema } from '@vee-validate/yup'
 import { useToast } from 'primevue/usetoast'
+import { useStorage } from '@vueuse/core'
+import { computed } from 'vue'
 
 type QuibleTokens = {
   access_token?: string,
   refresh_token?: string
 }
 
-type ErrorPayload = {
-  code: number,
-  message: string
-}
+const quibleTokens = useStorage<QuibleTokens>('tokens', {})
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000
+    }
+  }
+})
 
 const toast = useToast()
 
@@ -35,39 +42,42 @@ const { errors, isSubmitting, handleSubmit, defineField } = useForm({
 
 const [email] = defineField('email')
 const [password] = defineField('password')
-
-const { data: tokens, error: loginError, refetch: doLogin } = useQuery<QuibleTokens, AxiosError<ErrorPayload>>({
-  queryKey: ['tokens'],
-  enabled: false,
-  retry: false,
-  queryFn: () => {
-    return axios.post<QuibleTokens>(
-      `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/login`,
-      {
-        email: email.value,
-        password: password.value
-      }
-    ).then(
-      ({ data }) => {
-        return data
-      }
-    )
-  }
-})
+const loginQueryKey = computed(
+  () => ['tokens', email.value, password.value]
+)
 
 const onSubmit = handleSubmit(
   async () => {
-    await doLogin()
-    if (loginError.value) {
+    try {
+      const data = await queryClient.fetchQuery({
+        queryKey: loginQueryKey,
+        retry: false,
+        queryFn: () => axios.post<QuibleTokens>(
+          `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/login`,
+          {
+            email: email.value,
+            password: password.value
+          }
+        ).then(
+          ({ data }) => {
+            return data
+          }
+        )
+      })
+      quibleTokens.value = data
+      // redirect to ...
+    } catch (error) {
+      let errorMessage = 'unknown error'
+      if (error instanceof AxiosError) {
+        errorMessage = error?.response?.data?.message ?? 'invalid credentials'
+      }
       toast.add({
         severity: 'error',
         summary: 'Login failed',
-        detail: loginError.value?.response?.data?.message ?? 'invalid credentials',
+        detail: errorMessage,
         life: 5000
       })
-      return
     }
-    console.log(tokens.value)
   }
 )
 
