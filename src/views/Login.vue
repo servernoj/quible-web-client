@@ -11,11 +11,7 @@ import { toTypedSchema } from '@vee-validate/yup'
 import { useToast } from 'primevue/usetoast'
 import { useStorage } from '@vueuse/core'
 import { computed } from 'vue'
-
-type QuibleTokens = {
-  access_token?: string,
-  refresh_token?: string
-}
+import type { QuibleTokens } from '@/types'
 
 const quibleTokens = useStorage<QuibleTokens>('tokens', {})
 
