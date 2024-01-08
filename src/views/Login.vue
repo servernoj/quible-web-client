@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { QueryClient } from '@tanstack/vue-query'
 import axios, { AxiosError } from 'axios'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
@@ -12,16 +11,12 @@ import { useToast } from 'primevue/usetoast'
 import { useStorage } from '@vueuse/core'
 import { computed } from 'vue'
 import type { QuibleTokens } from '@/types'
+import { useRouter } from 'vue-router'
+import queryClient from '@/queryClient'
 
 const quibleTokens = useStorage<QuibleTokens>('tokens', {})
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000
-    }
-  }
-})
+const router = useRouter()
 
 const toast = useToast()
 
@@ -47,6 +42,7 @@ const onSubmit = handleSubmit(
     try {
       const data = await queryClient.fetchQuery({
         queryKey: loginQueryKey,
+        staleTime: 5 * 60 * 1000,
         retry: false,
         queryFn: () => axios.post<QuibleTokens>(
           `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/login`,
@@ -61,7 +57,7 @@ const onSubmit = handleSubmit(
         )
       })
       quibleTokens.value = data
-      // redirect to ...
+      router.push({ name: 'chat' })
     } catch (error) {
       let errorMessage = 'unknown error'
       if (error instanceof AxiosError) {
@@ -81,7 +77,7 @@ const onSubmit = handleSubmit(
 
 <template>
   <div class="h-full flex justify-content-center align-items-center">
-    <Card>
+    <Card class="p-3">
       <template #title>
         Quible Login
       </template>
@@ -93,20 +89,30 @@ const onSubmit = handleSubmit(
           <div class="flex flex-column gap-2">
             <label for="email">Email</label>
             <InputText
+              id="email"
               v-model="email"
               :class="{ 'p-invalid': errors.email }"
+              :pt="{
+                root: {
+                  autocomplete: true
+                }
+              }"
             />
             <small class="p-error">
               {{ errors.email || '&nbsp;' }}
             </small>
           </div>
           <div class="flex flex-column gap-2">
-            <label for="email">Password</label>
+            <label for="password">Password</label>
             <Password
               v-model="password"
               :feedback="false"
               :class="{ 'p-invalid': errors.password }"
               toggle-mask
+              input-id="password"
+              :input-props="{
+                autocomplete: 'true'
+              }"
             />
             <small class="p-error">
               {{ errors.password || '&nbsp;' }}

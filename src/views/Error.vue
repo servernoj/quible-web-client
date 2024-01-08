@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import Card from 'primevue/card'
 const route = useRoute()
 const code = route.query.kind ?? '404'
 const message = {
@@ -14,20 +13,20 @@ const message = {
       ? `Unauthorized access to ${route.query.path}`
       : 'Unauthorized access'
   )
-}[code as string] ?? ''
+}[code as string] ?? 'Unknown error'
 </script>
 
 <template>
   <div class="h-full flex flex-column justify-content-center align-items-center">
     <div class="h-10rem" />
-    <Card class="p-3">
-      <template #title>
-        Error {{ code }}
-      </template>
-      <template #content>
+    <section class="flex flex-column gap-3 align-items-start">
+      <h1 class="text-8xl m-0">
+        {{ code }}
+      </h1>
+      <h1 class="m-0 font-light">
         {{ message }}
-      </template>
-    </Card>
+      </h1>
+    </section>
     <div class="flex-grow-1" />
   </div>
 </template>
