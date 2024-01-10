@@ -20,9 +20,9 @@ const router = createRouter({
       component: Home
     },
     {
-      path: '/chat',
-      name: 'chat',
-      component: () => import('@/views/Chat.vue'),
+      path: '/live',
+      name: 'live',
+      component: () => import('@/views/Live.vue'),
       meta: { requiresAuth: true }
     },
     {

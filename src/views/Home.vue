@@ -7,8 +7,8 @@ import { RouterLink } from 'vue-router'
     <RouterLink :to="{name: 'login'}">
       Login
     </RouterLink>
-    <RouterLink :to="{name: 'chat'}">
-      Chat
+    <RouterLink :to="{name: 'live'}">
+      Live
     </RouterLink>
     <RouterLink :to="{name: 'error', query: {kind: 401}}">
       Error
