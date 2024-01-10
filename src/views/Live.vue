@@ -1,73 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { ref } from 'vue'
 import * as Ably from 'ably'
 import { getAccessToken } from '@/bridge'
-// -- types
-type Score = {
-  current: number
-  display: number
-  period1?: number
-  period2?: number
-  period3?: number
-  period4?: number
-  overtime?: number
-}
-type Team = {
-  id: number
-  name: string
-  slug: string
-  shortName: string
-  nameCode: string
-  logoUrl: string
-}
-type Time = {
-  played: number
-  periodLength: number
-  overtimeLength: number
-  totalPeriodCount: number
-  currentPeriodStartTimestamp?: number
-}
-type Status = {
-  code: number
-  description: string
-  type: string
-}
-type Season = {
-  name: string
-  year: string
-  id: number
-}
-type Tournament = {
-  name: string
-  id: number
-}
-type GameUpdate = {
-  tournament: Tournament
-  season: Season
-  status: Status
-  homeTeam: Team
-  awayTeam: Team
-  homeScore: Score
-  awayScore: Score
-  time: Time
-  id: number
-  startTimestamp: number
-  slug: string
-}
-type LiveMessageData = {
-  eventIDs: number[],
-  events: GameUpdate[]
-}
+import type { GameUpdate, LiveMessageData } from '@/types/live'
+import useAbly from '@/composables/ably'
 
-// -- constants
-const EventMessage = 'update'
-const ChannelName = 'live:BasketAPI'
-// -- refs
-const realtime = ref<Ably.Types.RealtimePromise>()
-const channel = ref<Ably.Types.RealtimeChannelPromise>()
 const recentUpdates = ref<GameUpdate[]>([])
 
-const onMessage = async (message: Ably.Types.Message) => {
+const onMessage = (message: Ably.Types.Message) => {
   const { eventIDs, events } = message.data as LiveMessageData
   const eventsById = [...recentUpdates.value, ...events].reduce(
     (acc, ev) => {
@@ -80,40 +20,25 @@ const onMessage = async (message: Ably.Types.Message) => {
   )
   recentUpdates.value = Object.values(eventsById)
 }
-onMounted(
-  async () => {
-    // get the token
-    const accessToken = await getAccessToken()
-    // initialize the realtime engine (ably)
-    realtime.value = new Ably.Realtime.Promise({
-      authMethod: 'GET',
-      authHeaders: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      authUrl: `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/rt/token`
-    })
-    await realtime.value.connection.once('connected')
-    // channel
-    channel.value = await realtime.value.channels.get(ChannelName)
-    await channel.value.attach()
-    await channel.value.subscribe(EventMessage, onMessage)
-  }
-)
-onUnmounted(
-  async () => {
-    await channel.value?.unsubscribe(EventMessage, onMessage)
-    await channel.value?.detach()
-    realtime.value?.channels.release(ChannelName)
-  }
-)
+useAbly({
+  channelName: 'live:BasketAPI',
+  eventName: 'update',
+  historyLengthMills: 5 * 60 * 1000,
+  tokenOrGetToken: getAccessToken,
+  onMessage
+})
 </script>
 
 <template>
   <div class="flex flex-column align-items-center">
+    <h2 v-if="!recentUpdates.length" class="my-8">
+      No live matches at the moment
+    </h2>
     <template v-for="ev,idx of recentUpdates" :key="idx">
-      <article class="m-5 w-6 flex justify-content-between align-items">
-        <section class="flex-grow flex flex-column align-items-center">
-          <img :src="ev.homeTeam.logoUrl" class="h-5rem">
+      <article class="my-5 w-12 flex justify-content-between align-items-center">
+        <section class="w-3 flex flex-column align-items-center">
+          <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem">
+          <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem">
           <h3>
             {{ ev.homeTeam.shortName }}
           </h3>
@@ -126,10 +51,11 @@ onUnmounted(
             {{ ev.status.description }}
           </h3>
         </section>
-        <section class="flex-grow flex flex-column align-items-center">
-          <img :src="ev.awayTeam.logoUrl" class="h-5rem">
+        <section class="w-3 flex flex-column align-items-center">
+          <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem">
+          <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem">
           <h3>
-            {{ ev.homeTeam.shortName }}
+            {{ ev.awayTeam.shortName }}
           </h3>
         </section>
       </article>

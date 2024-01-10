@@ -22,7 +22,7 @@ export const getAccessToken = () => {
     )
   } else {
     const quibleTokens = useStorage<QuibleTokens>('tokens', {})
-    return Promise.resolve(quibleTokens.value.access_token)
+    return Promise.resolve(quibleTokens.value.access_token as string)
   }
 }
 
