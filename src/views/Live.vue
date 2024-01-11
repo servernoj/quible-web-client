@@ -35,6 +35,18 @@ const { isLoading } = useAbly({
   tokenOrGetToken: getAccessToken,
   onMessage
 })
+
+const getInPeriodTime = (time: GameUpdate['time']) => {
+  const isOvertime = time.played > time.totalPeriodCount * time.periodLength
+  const totalSeconds = isOvertime
+    ? time.played - time.periodLength * time.totalPeriodCount
+    : time.played % time.periodLength
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
+  return `${minutes}:${secondsWithLeadingZero}`
+}
+
 </script>
 
 <template>
@@ -57,9 +69,9 @@ const { isLoading } = useAbly({
           <h1 class="m-0 text-6xl sm:text-4xls">
             {{ ev.homeScore.current }}:{{ ev.awayScore.current }}
           </h1>
-          <h4>
-            {{ ev.status.description }}
-          </h4>
+          <h2 class="my-2">
+            {{ ev.status.description }} ({{ getInPeriodTime(ev.time) }})
+          </h2>
         </section>
         <section class="w-3 flex flex-column align-items-center">
           <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem sm:h-3rem">
