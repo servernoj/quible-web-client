@@ -84,7 +84,7 @@ router.beforeEach(
       if (!isTokenGood) {
         return isMobile
           ? { name: 'error', query: { kind: 403, path: to.path } }
-          : { name: 'login' }
+          : { name: 'login', query: { target: to.path } }
       }
     }
   }

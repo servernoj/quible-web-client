@@ -11,12 +11,14 @@ import { useToast } from 'primevue/usetoast'
 import { useStorage } from '@vueuse/core'
 import { computed } from 'vue'
 import type { QuibleTokens } from '@/types'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import queryClient from '@/queryClient'
 
 const quibleTokens = useStorage<QuibleTokens>('tokens', {})
 
 const router = useRouter()
+
+const route = useRoute()
 
 const toast = useToast()
 
@@ -57,7 +59,11 @@ const onSubmit = handleSubmit(
         )
       })
       quibleTokens.value = data
-      router.push({ name: 'home' })
+      if (route.query.target) {
+        router.push({ path: route.query.target as string })
+      } else {
+        router.push({ name: 'home' })
+      }
     } catch (error) {
       let errorMessage = 'unknown error'
       if (error instanceof AxiosError) {
