@@ -51,35 +51,35 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
 
 <template>
   <div v-if="!isLoading" class="lg:p-5 w-full flex flex-column align-items-center gap-2">
-    <h2 v-if="!recentUpdates.length" class="my-8">
+    <h2 v-if="!recentUpdates.length" class="my-8 text-gray-400">
       No live matches at the moment
     </h2>
     <template v-for="ev,idx of recentUpdates" :key="idx">
       <article
-        class="w-12 lg:w-6 flex justify-content-between align-items-start bg-gray-700 py-3"
+        class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl py-3"
       >
         <section class="w-3 flex flex-column align-items-center">
           <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem sm:h-3rem">
           <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
-          <h5>
+          <h5 class="text-gray-300">
             {{ ev.homeTeam.shortName }}
           </h5>
         </section>
         <section class="flex-grow flex flex-column align-items-center">
-          <h1 class="m-0 text-6xl sm:text-4xls">
+          <h1 class="m-0 text-6xl sm:text-4xls text-color-primary">
             {{ ev.homeScore.current }}:{{ ev.awayScore.current }}
           </h1>
-          <h2 class="my-2">
+          <h2 class="my-2 font-light text-color-secondary">
             {{ ev.status.description }}
           </h2>
-          <h3 class="my-1">
+          <h3 class="my-1 font-light text-gray-400">
             {{ getInPeriodTime(ev.time) }}
           </h3>
         </section>
         <section class="w-3 flex flex-column align-items-center">
           <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem sm:h-3rem">
           <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
-          <h5>
+          <h5 class="text-gray-300">
             {{ ev.awayTeam.shortName }}
           </h5>
         </section>
