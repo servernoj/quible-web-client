@@ -70,8 +70,11 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
             {{ ev.homeScore.current }}:{{ ev.awayScore.current }}
           </h1>
           <h2 class="my-2">
-            {{ ev.status.description }} ({{ getInPeriodTime(ev.time) }})
+            {{ ev.status.description }}
           </h2>
+          <h3 class="my-1">
+            {{ getInPeriodTime(ev.time) }}
+          </h3>
         </section>
         <section class="w-3 flex flex-column align-items-center">
           <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem sm:h-3rem">
