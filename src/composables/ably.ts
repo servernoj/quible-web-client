@@ -5,21 +5,27 @@ type Options = {
   onMessage: (message: Ably.Types.Message) => void,
   onHistoryItem?: (message: Ably.Types.Message) => void,
   channelName: string,
-  historyLengthMills?: number,
   eventName: string
   tokenOrGetToken: string | (() => string | Promise<string>)
+  history? : {
+    timeMills: number,
+    // -- assumes [0] to be the most recent historical message
+    handler: (messages: Ably.Types.Message[]) => void
+  }
 }
 
-const useAbly = async (options: Options) => {
-  const { onMessage, onHistoryItem, channelName, historyLengthMills, eventName } = options
+const useAbly = (options: Options) => {
+  const { onMessage, history, channelName, eventName } = options
   const realtime = ref<Ably.Types.RealtimePromise>()
   const channel = ref<Ably.Types.RealtimeChannelPromise>()
+  const isLoading = ref(true)
   onMounted(
     async () => {
+      // Get the [quible] access token to authorize Ably SDK initialization
       const token = typeof options.tokenOrGetToken === 'string'
         ? options.tokenOrGetToken
         : await options.tokenOrGetToken()
-
+      // initialize Ably SDK
       realtime.value = new Ably.Realtime.Promise({
         authMethod: 'GET',
         authHeaders: {
@@ -27,19 +33,22 @@ const useAbly = async (options: Options) => {
         },
         authUrl: `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/rt/token`
       })
+      // make sure we are connected
       await realtime.value.connection.once('connected')
       // channel
       channel.value = await realtime.value.channels.get(channelName)
       await channel.value.attach()
-      if (typeof historyLengthMills !== 'undefined') {
+      // retrieve history
+      if (history) {
         const oldMessages = await channel.value.history({
-          start: new Date().getTime() - historyLengthMills,
+          start: new Date().getTime() - history.timeMills,
           untilAttach: true
         })
-        oldMessages.items.reverse().forEach(onHistoryItem ?? onMessage)
+        await history.handler(oldMessages.items)
       }
-
+      // subscribe for new items
       await channel.value.subscribe(eventName, onMessage)
+      isLoading.value = false
     }
   )
   onUnmounted(
@@ -51,7 +60,8 @@ const useAbly = async (options: Options) => {
   )
   return {
     realtime,
-    channel
+    channel,
+    isLoading
   }
 }
 

@@ -8,6 +8,6 @@ import queryClient from '@/queryClient'
   <main class="h-screen">
     <Toast />
     <RouterView />
-    <VueQueryDevtools :client="queryClient" />
+    <VueQueryDevtools v-if="false" :client="queryClient" />
   </main>
 </template>

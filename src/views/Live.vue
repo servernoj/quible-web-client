@@ -20,43 +20,53 @@ const onMessage = (message: Ably.Types.Message) => {
   )
   recentUpdates.value = Object.values(eventsById)
 }
-useAbly({
-  channelName: 'live:BasketAPI',
-  eventName: 'update',
-  historyLengthMills: 5 * 60 * 1000,
+
+const historyHandler = (historyItems: Ably.Types.Message[]) => {
+  historyItems.reverse().forEach(onMessage)
+}
+
+const { isLoading } = useAbly({
+  channelName: 'live:main',
+  eventName: 'message',
+  history: {
+    timeMills: 5 * 60 * 1000,
+    handler: historyHandler
+  },
   tokenOrGetToken: getAccessToken,
   onMessage
 })
 </script>
 
 <template>
-  <div class="flex flex-column align-items-center">
+  <div v-if="!isLoading" class="lg:p-5 w-full flex flex-column align-items-center gap-2">
     <h2 v-if="!recentUpdates.length" class="my-8">
       No live matches at the moment
     </h2>
     <template v-for="ev,idx of recentUpdates" :key="idx">
-      <article class="my-5 w-12 flex justify-content-between align-items-center">
+      <article
+        class="w-12 lg:w-6 flex justify-content-between align-items-start bg-gray-700 py-3"
+      >
         <section class="w-3 flex flex-column align-items-center">
-          <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem">
-          <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem">
-          <h3>
+          <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem sm:h-3rem">
+          <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
+          <h5>
             {{ ev.homeTeam.shortName }}
-          </h3>
+          </h5>
         </section>
         <section class="flex-grow flex flex-column align-items-center">
-          <h1 class="m-0 text-8xl">
+          <h1 class="m-0 text-6xl sm:text-4xls">
             {{ ev.homeScore.current }}:{{ ev.awayScore.current }}
           </h1>
-          <h3>
+          <h4>
             {{ ev.status.description }}
-          </h3>
+          </h4>
         </section>
         <section class="w-3 flex flex-column align-items-center">
-          <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem">
-          <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem">
-          <h3>
+          <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem sm:h-3rem">
+          <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
+          <h5>
             {{ ev.awayTeam.shortName }}
-          </h3>
+          </h5>
         </section>
       </article>
     </template>

@@ -57,7 +57,7 @@ const onSubmit = handleSubmit(
         )
       })
       quibleTokens.value = data
-      router.push({ name: 'live' })
+      router.push({ name: 'home' })
     } catch (error) {
       let errorMessage = 'unknown error'
       if (error instanceof AxiosError) {
