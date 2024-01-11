@@ -24,8 +24,8 @@ const toast = useToast()
 
 const validationSchema = toTypedSchema(
   yup.object({
-    email: yup.string().email().required().default('simonbaev@gmail.com'),
-    password: yup.string().required().default('password')
+    email: yup.string().email().required(),
+    password: yup.string().required()
   })
 )
 
