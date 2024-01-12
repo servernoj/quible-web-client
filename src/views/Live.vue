@@ -79,12 +79,12 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
       </h2>
       <template v-for="ev,idx of recentUpdates" :key="idx">
         <article
-          class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl py-3 select-none"
+          class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl p-2 select-none"
         >
           <section class="w-3 flex flex-column align-items-center">
             <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem sm:h-3rem">
             <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
-            <h5 class="text-gray-300">
+            <h5 class="text-gray-300 text-center">
               {{ ev.homeTeam.shortName }}
             </h5>
           </section>
@@ -102,7 +102,7 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
           <section class="w-3 flex flex-column align-items-center">
             <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem sm:h-3rem">
             <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
-            <h5 class="text-gray-300">
+            <h5 class="text-gray-300 text-center">
               {{ ev.awayTeam.shortName }}
             </h5>
           </section>
