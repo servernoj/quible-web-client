@@ -3,6 +3,7 @@ import Message from 'primevue/message'
 import Card from 'primevue/card'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
+import Skeleton from 'primevue//skeleton'
 import { useForm } from 'vee-validate'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
@@ -31,6 +32,7 @@ const [confirmPassword] = defineField('confirmPassword')
 
 const errorBanner = ref<string>()
 const showForm = ref(false)
+const isLoading = ref(true)
 const route = useRoute()
 const toast = useToast()
 
@@ -78,65 +80,85 @@ onMounted(async () => {
   } catch (e) {
     const message = (e as AxiosError<{message: string}>)?.response?.data?.message ?? 'unable to perform request'
     errorBanner.value = message[0].toUpperCase() + message.slice(1)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>
 
 <template>
-  <div class="h-full flex justify-content-center align-items-center p-5">
-    <Card v-if="showForm" class="p-3 w-5">
-      <template #title>
-        Quible password reset
-      </template>
-      <template #content>
-        <form
-          class="flex flex-column gap-2 w-full p-fluid"
-          @submit="onSubmit"
-        >
-          <div class="flex flex-column gap-2">
-            <label for="password">Password</label>
-            <Password
-              v-model="password"
-              :feedback="false"
-              :class="{ 'p-invalid': errors.password }"
-              toggle-mask
-              input-id="password"
-              :input-props="{
-                autocomplete: 'true'
-              }"
-            />
-            <small class="ml-1 p-error">
-              {{ errors.password || '&nbsp;' }}
-            </small>
-          </div>
-          <div class="flex flex-column gap-2">
-            <label for="confirm-password">Confirm password</label>
-            <Password
-              v-model="confirmPassword"
-              :feedback="false"
-              :class="{ 'p-invalid': errors.confirmPassword }"
-              toggle-mask
-              input-id="confirm-password"
-              :input-props="{
-                autocomplete: 'true'
-              }"
-            />
-            <small class="ml-1 p-error">
-              {{ errors.confirmPassword || '&nbsp;' }}
-            </small>
-          </div>
+  <div class="h-full flex justify-content-center align-items-start p-5">
+    <div v-if="isLoading" class="w-4 my-auto p-5 border-round border-1 surface-border surface-card">
+      <Skeleton width="75%" height="2rem" />
+      <div class="flex flex-column gap-4 w-full mt-5">
+        <div class="flex flex-column gap-2">
+          <Skeleton width="50%" height="1rem" />
+          <Skeleton height="2.5rem" />
+        </div>
+        <div class="flex flex-column gap-2">
+          <Skeleton width="50%" height="1rem" />
+          <Skeleton height="2.5rem" />
+        </div>
+        <div class="mt-3">
+          <Skeleton width="100%" height="3rem" />
+        </div>
+      </div>
+    </div>
+    <template v-else>
+      <Card v-if="showForm" class="p-3 w-4 my-auto">
+        <template #title>
+          Quible password reset
+        </template>
+        <template #content>
+          <form
+            class="flex flex-column gap-2 w-full p-fluid"
+            @submit="onSubmit"
+          >
+            <div class="flex flex-column gap-2">
+              <label for="password">Password</label>
+              <Password
+                v-model="password"
+                :feedback="false"
+                :class="{ 'p-invalid': errors.password }"
+                toggle-mask
+                input-id="password"
+                :input-props="{
+                  autocomplete: 'true'
+                }"
+              />
+              <small class="ml-1 p-error">
+                {{ errors.password || '&nbsp;' }}
+              </small>
+            </div>
+            <div class="flex flex-column gap-2">
+              <label for="confirm-password">Confirm password</label>
+              <Password
+                v-model="confirmPassword"
+                :feedback="false"
+                :class="{ 'p-invalid': errors.confirmPassword }"
+                toggle-mask
+                input-id="confirm-password"
+                :input-props="{
+                  autocomplete: 'true'
+                }"
+              />
+              <small class="ml-1 p-error">
+                {{ errors.confirmPassword || '&nbsp;' }}
+              </small>
+            </div>
 
-          <Button
-            :icon="`${isSubmitting ? 'pi pi-ellipsis-h pi-spin' : ''}`"
-            :disabled="isSubmitting"
-            type="submit"
-            label="Submit"
-          />
-        </form>
-      </template>
-    </Card>
-    <Message v-else-if="errorBanner" class="w-full" severity="error" :closable="false">
-      {{ errorBanner }}
-    </Message>
+            <Button
+              :icon="`${isSubmitting ? 'pi pi-ellipsis-h pi-spin' : ''}`"
+              :disabled="isSubmitting"
+              type="submit"
+              label="Submit"
+            />
+          </form>
+        </template>
+      </Card>
+      <Message v-else-if="errorBanner" class="w-full" severity="error" :closable="false">
+        {{ errorBanner }}
+      </Message>
+    </template>
   </div>
 </template>
