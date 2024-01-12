@@ -74,7 +74,7 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
       </div>
     </template>
     <template v-else>
-      <h2 v-if="!recentUpdates.length" class="my-8 text-gray-400">
+      <h2 v-if="!recentUpdates.length" class="mt-4 lg:mt-8 text-gray-400">
         No live matches at the moment
       </h2>
       <template v-for="ev,idx of recentUpdates" :key="idx">

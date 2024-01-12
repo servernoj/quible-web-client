@@ -75,6 +75,8 @@ const onSubmit = handleSubmit(
         detail: errorMessage,
         life: 5000
       })
+    } finally {
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
   }
 )
