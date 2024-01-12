@@ -34,14 +34,24 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/Login.vue'),
-      meta: { requiresAuth: false }
+      component: () => import('@/views/Login.vue')
     },
     {
       path: '/error',
       name: 'error',
-      component: Error,
-      meta: { requiresAuth: false }
+      component: Error
+    },
+    {
+      path: '/forms',
+      redirect: '/'
+    },
+    {
+      path: '/forms/activation',
+      component: () => import('@/views/forms/UserActivation.vue')
+    },
+    {
+      path: '/forms/password-reset',
+      component: () => import('@/views/forms/PasswordReset.vue')
     },
     {
       path: '/:pathMatch(.*)',
