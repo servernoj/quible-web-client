@@ -25,7 +25,7 @@ onMounted(async () => {
       }
     }
   } catch (e) {
-    const message = (e as AxiosError<{message: string}>)?.response?.data?.message ?? 'unable to complete request'
+    const message = (e as AxiosError<{message: string}>)?.response?.data?.message ?? 'unable to perform request'
     messageDetails.value = {
       content: message[0].toUpperCase() + message.slice(1),
       props: {
