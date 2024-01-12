@@ -51,7 +51,7 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
 </script>
 
 <template>
-  <div class="lg:p-5 w-full flex flex-column align-items-center gap-2">
+  <div class="p-2 lg:p-5 w-full flex flex-column align-items-center gap-2">
     <template v-if="isLoading">
       <div
         v-for="_,idx in Array(3)"
@@ -79,7 +79,7 @@ const getInPeriodTime = (time: GameUpdate['time']) => {
       </h2>
       <template v-for="ev,idx of recentUpdates" :key="idx">
         <article
-          class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl py-3"
+          class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl py-3 select-none"
         >
           <section class="w-3 flex flex-column align-items-center">
             <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem sm:h-3rem">
