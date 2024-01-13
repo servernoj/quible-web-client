@@ -84,14 +84,14 @@ const onSubmit = handleSubmit(
 </script>
 
 <template>
-  <div class="h-full flex justify-content-center align-items-center">
-    <Card class="p-3">
+  <div class="h-full flex justify-content-center align-items-center p-3">
+    <Card class="w-full lg:w-4 p-3">
       <template #title>
-        Quible Login
+        Quible login
       </template>
       <template #content>
         <form
-          class="flex flex-column gap-2"
+          class="flex flex-column gap-2 p-fluid"
           @submit="onSubmit"
         >
           <div class="flex flex-column gap-2">
@@ -106,7 +106,7 @@ const onSubmit = handleSubmit(
                 }
               }"
             />
-            <small class="p-error">
+            <small class="ml-1 p-error">
               {{ errors.email || '&nbsp;' }}
             </small>
           </div>
@@ -122,7 +122,7 @@ const onSubmit = handleSubmit(
                 autocomplete: 'true'
               }"
             />
-            <small class="p-error">
+            <small class="ml-1p-error">
               {{ errors.password || '&nbsp;' }}
             </small>
           </div>

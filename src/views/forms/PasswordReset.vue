@@ -87,8 +87,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="h-full flex justify-content-center align-items-start p-5">
-    <div v-if="isLoading" class="w-4 my-auto p-5 border-round border-1 surface-border surface-card">
+  <div class="h-full flex justify-content-center align-items-start p-3">
+    <div v-if="isLoading" class="w-full lg:w-4 my-auto p-5 border-round border-1 surface-border surface-card">
       <Skeleton width="75%" height="2rem" />
       <div class="flex flex-column gap-4 w-full mt-5">
         <div class="flex flex-column gap-2">
@@ -105,13 +105,13 @@ onMounted(async () => {
       </div>
     </div>
     <template v-else>
-      <Card v-if="showForm" class="p-3 w-4 my-auto">
+      <Card v-if="showForm" class="p-3 w-full lg:w-4 my-auto">
         <template #title>
           Quible password reset
         </template>
         <template #content>
           <form
-            class="flex flex-column gap-2 w-full p-fluid"
+            class="flex flex-column gap-2 p-fluid"
             @submit="onSubmit"
           >
             <div class="flex flex-column gap-2">
