@@ -22,8 +22,7 @@ const router = createRouter({
     {
       path: '/live',
       name: 'live',
-      component: () => import('@/views/Live.vue'),
-      meta: { requiresAuth: true }
+      component: () => import('@/views/Live.vue')
     },
     {
       path: '/chat',

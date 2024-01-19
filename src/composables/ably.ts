@@ -1,38 +1,54 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as Ably from 'ably'
 
-type Options = {
+type BaseOptions = {
   onMessage: (message: Ably.Types.Message) => void,
   onHistoryItem?: (message: Ably.Types.Message) => void,
   channelName: string,
   eventName: string
-  tokenOrGetToken: string | (() => string | Promise<string>)
   history? : {
     timeMills: number,
     // -- assumes [0] to be the most recent historical message
     handler: (messages: Ably.Types.Message[]) => void
   }
 }
+export type UseAblyOptions = BaseOptions & (
+  {
+    tokenOrGetToken: string | (() => string | Promise<string>)
+    authOptions?: never
+  } | {
+    tokenOrGetToken?: never
+    authOptions: Ably.Types.ClientOptions
+  }
+)
 
-const useAbly = (options: Options) => {
+const useAbly = (options: UseAblyOptions) => {
   const { onMessage, history, channelName, eventName } = options
   const realtime = ref<Ably.Types.RealtimePromise>()
   const channel = ref<Ably.Types.RealtimeChannelPromise>()
   const isLoading = ref(true)
-  onMounted(
-    async () => {
-      // Get the [quible] access token to authorize Ably SDK initialization
+  const getAuthOptions = async (options: UseAblyOptions): Promise<Ably.Types.ClientOptions> => {
+    // Get the [quible] access token to authorize Ably SDK initialization
+    if (options?.authOptions) {
+      return options.authOptions
+    } else {
       const token = typeof options.tokenOrGetToken === 'string'
         ? options.tokenOrGetToken
         : await options.tokenOrGetToken()
-      // initialize Ably SDK
-      realtime.value = new Ably.Realtime.Promise({
+      return {
         authMethod: 'GET',
         authHeaders: {
           Authorization: `Bearer ${token}`
         },
         authUrl: `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/rt/token`
-      })
+      }
+    }
+  }
+  onMounted(
+    async () => {
+      // initialize Ably SDK
+      const authOptions = await getAuthOptions(options)
+      realtime.value = new Ably.Realtime.Promise(authOptions)
       // make sure we are connected
       await realtime.value.connection.once('connected')
       // channel

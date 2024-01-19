@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import * as Ably from 'ably'
-import { getAccessToken } from '@/bridge'
 import type { GameUpdate, LiveMessageData } from '@/types/live'
 import useAbly from '@/composables/ably'
 import Skeleton from 'primevue/skeleton'
@@ -33,8 +32,11 @@ const { isLoading } = useAbly({
     timeMills: 5 * 60 * 1000,
     handler: historyHandler
   },
-  tokenOrGetToken: getAccessToken,
-  onMessage
+  onMessage,
+  authOptions: {
+    authMethod: 'GET',
+    authUrl: `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/rt/read-only-token`
+  }
 })
 
 const getInPeriodTime = (time: GameUpdate['time']) => {
