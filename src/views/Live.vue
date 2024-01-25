@@ -35,7 +35,7 @@ const { isLoading } = useAbly({
   onMessage,
   authOptions: {
     authMethod: 'GET',
-    authUrl: `${import.meta.env.VITE_AUTH_SERVICE_BASE_URL}/rt/read-only-token`
+    authUrl: `${import.meta.env.VITE_APP_SERVICE_BASE_URL}/live/token`
   }
 })
 
