@@ -49,6 +49,10 @@ const router = createRouter({
       component: () => import('@/views/forms/UserActivation.vue')
     },
     {
+      path: '/forms/accept-private-chat-invitation',
+      component: () => import('@/views/forms/AcceptChatInvitation.vue')
+    },
+    {
       path: '/forms/password-reset',
       component: () => import('@/views/forms/PasswordReset.vue')
     },
