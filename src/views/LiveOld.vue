@@ -28,7 +28,6 @@ const historyHandler = (historyItems: Ably.Types.Message[]) => {
 const { isLoading } = useAbly({
   channelName: 'live:main',
   eventName: 'message',
-  isDebug: true,
   history: {
     timeMills: 5 * 60 * 1000,
     handler: historyHandler
@@ -40,7 +39,7 @@ const { isLoading } = useAbly({
   }
 })
 
-const timePlayed = (time: GameUpdate['time']) => {
+const getInPeriodTime = (time: GameUpdate['time']) => {
   const isOvertime = time.played > time.totalPeriodCount * time.periodLength
   const totalSeconds = isOvertime
     ? time.played - time.periodLength * time.totalPeriodCount
@@ -50,16 +49,6 @@ const timePlayed = (time: GameUpdate['time']) => {
   const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
   return `${minutes}:${secondsWithLeadingZero}`
 }
-// const timeLeft = (time: GameUpdate['time']) => {
-//   const isOvertime = time.played > time.totalPeriodCount * time.periodLength
-//   const totalSeconds = isOvertime
-//     ? time.overtimeLength - (time.played - time.periodLength * time.totalPeriodCount)
-//     : time.periodLength - time.played % time.periodLength
-//   const minutes = Math.floor(totalSeconds / 60)
-//   const seconds = totalSeconds % 60
-//   const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
-//   return `${minutes}:${secondsWithLeadingZero}`
-// }
 
 </script>
 
@@ -67,7 +56,7 @@ const timePlayed = (time: GameUpdate['time']) => {
   <div class="p-2 lg:p-5 w-full flex flex-column align-items-center gap-2">
     <template v-if="isLoading">
       <div
-        v-for="_,idx in Array(5)"
+        v-for="_,idx in Array(3)"
         :key="idx"
         class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl p-2"
       >
@@ -109,7 +98,7 @@ const timePlayed = (time: GameUpdate['time']) => {
               {{ ev.status.description }}
             </h2>
             <h3 class="my-1 font-light text-gray-400">
-              {{ timePlayed(ev.time) }}
+              {{ getInPeriodTime(ev.time) }}
             </h3>
           </section>
           <section class="w-3 flex flex-column align-items-center">

@@ -6,6 +6,7 @@ type BaseOptions = {
   onHistoryItem?: (message: Ably.Types.Message) => void,
   channelName: string,
   eventName: string
+  isDebug: boolean,
   history? : {
     timeMills: number,
     // -- assumes [0] to be the most recent historical message
@@ -56,14 +57,84 @@ const useAbly = (options: UseAblyOptions) => {
       await channel.value.attach()
       // retrieve history
       if (history) {
-        const oldMessages = await channel.value.history({
-          start: new Date().getTime() - history.timeMills,
-          untilAttach: true
-        })
+        const oldMessages = options.isDebug
+          ? {
+              items: [
+                {
+                  data: {
+                    eventIDs: [1, 2, 3],
+                    events: [
+                      {
+                        id: 1,
+                        status: {
+                          description: '1st quarter'
+                        },
+                        homeTeam: {
+                          logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/ind.png',
+                          shortName: 'Pacers',
+                          nameCode: 'IND'
+                        },
+                        awayTeam: {
+                          logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png',
+                          shortName: 'Warriors',
+                          nameCode: 'GSW'
+                        },
+                        homeScore: {
+                          current: 34
+                        },
+                        awayScore: {
+                          current: 115
+                        },
+                        time: {
+                          played: 800,
+                          periodLength: 720,
+                          overtimeLength: 300,
+                          totalPeriodCount: 4
+                        }
+                      },
+                      {
+                        id: 2,
+                        status: {
+                          description: 'Overtime'
+                        },
+                        homeTeam: {
+                          logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/orl.png',
+                          shortName: 'Magic',
+                          nameCode: 'ORL'
+                        },
+                        awayTeam: {
+                          logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/sa.png',
+                          shortName: 'Spurs',
+                          nameCode: 'SAS'
+                        },
+                        homeScore: {
+                          current: 123
+                        },
+                        awayScore: {
+                          current: 101
+                        },
+                        time: {
+                          played: 4 * 720 + 100,
+                          periodLength: 720,
+                          overtimeLength: 300,
+                          totalPeriodCount: 4
+                        }
+                      }
+                    ]
+                  }
+                } as Ably.Types.Message
+              ]
+            }
+          : await channel.value.history({
+            start: new Date().getTime() - history.timeMills,
+            untilAttach: true
+          })
         await history.handler(oldMessages.items)
       }
       // subscribe for new items
-      await channel.value.subscribe(eventName, onMessage)
+      if (!options.isDebug) {
+        await channel.value.subscribe(eventName, onMessage)
+      }
       isLoading.value = false
     }
   )
