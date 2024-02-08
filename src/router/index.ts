@@ -22,6 +22,7 @@ const router = createRouter({
     {
       path: '/live',
       name: 'live',
+      props: (route) => ({ isDebug: typeof route.query.debug !== 'undefined' && !/^false$/i.test(route.query.debug as string) }),
       component: () => import('@/views/Live.vue')
     },
     {

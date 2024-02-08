@@ -7,6 +7,10 @@ import Skeleton from 'primevue/skeleton'
 
 const recentUpdates = ref<GameUpdate[]>([])
 
+const props = defineProps<{
+  isDebug?: boolean
+}>()
+
 const onMessage = (message: Ably.Types.Message) => {
   const { eventIDs, events } = message.data as LiveMessageData
   const eventsById = [...recentUpdates.value, ...events].reduce(
@@ -25,20 +29,90 @@ const historyHandler = (historyItems: Ably.Types.Message[]) => {
   historyItems.reverse().forEach(onMessage)
 }
 
-const { isLoading } = useAbly({
-  channelName: 'live:main',
-  eventName: 'message',
-  isDebug: true,
-  history: {
-    timeMills: 5 * 60 * 1000,
-    handler: historyHandler
-  },
-  onMessage,
-  authOptions: {
-    authMethod: 'GET',
-    authUrl: `${import.meta.env.VITE_APP_SERVICE_BASE_URL}/live/token`
-  }
-})
+const isLoading = ref(false)
+
+if (props.isDebug) {
+  historyHandler([
+    {
+      data: {
+        eventIDs: [1, 2, 3],
+        events: [
+          {
+            id: 1,
+            status: {
+              description: '1st quarter'
+            },
+            homeTeam: {
+              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/ind.png',
+              shortName: 'Pacers',
+              nameCode: 'IND'
+            },
+            awayTeam: {
+              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png',
+              shortName: 'Warriors',
+              nameCode: 'GSW'
+            },
+            homeScore: {
+              current: 34
+            },
+            awayScore: {
+              current: 115
+            },
+            time: {
+              played: 800,
+              periodLength: 720,
+              overtimeLength: 300,
+              totalPeriodCount: 4
+            }
+          },
+          {
+            id: 2,
+            status: {
+              description: 'Overtime'
+            },
+            homeTeam: {
+              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/orl.png',
+              shortName: 'Magic',
+              nameCode: 'ORL'
+            },
+            awayTeam: {
+              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/sa.png',
+              shortName: 'Spurs',
+              nameCode: 'SAS'
+            },
+            homeScore: {
+              current: 123
+            },
+            awayScore: {
+              current: 101
+            },
+            time: {
+              played: 4 * 720 + 100,
+              periodLength: 720,
+              overtimeLength: 300,
+              totalPeriodCount: 4
+            }
+          }
+        ]
+      }
+    } as Ably.Types.Message
+  ])
+} else {
+  useAbly({
+    isLoading,
+    channelName: 'live:main',
+    eventName: 'message',
+    history: {
+      timeMills: 5 * 60 * 1000,
+      handler: historyHandler
+    },
+    onMessage,
+    authOptions: {
+      authMethod: 'GET',
+      authUrl: `${import.meta.env.VITE_APP_SERVICE_BASE_URL}/live/token`
+    }
+  })
+}
 
 const timePlayed = (time: GameUpdate['time']) => {
   const isOvertime = time.played > time.totalPeriodCount * time.periodLength
