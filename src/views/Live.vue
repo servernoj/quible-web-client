@@ -178,7 +178,7 @@ const gameTime = (time: GameUpdate['time']) => {
       <div
         v-for="_,idx in Array(5)"
         :key="idx"
-        class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl p-2"
+        class="w-12 flex justify-content-between align-items-start surface-50 border-round-xl p-2"
       >
         <section class="w-3 flex flex-column align-items-center gap-2">
           <Skeleton height="4rem" width="4rem" />
