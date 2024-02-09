@@ -83,7 +83,10 @@ const historyHandler = async (historyItems: Ably.Types.Message[]) => {
   })
 }
 
-const { channel, realtime, isLoading } = useAbly({
+const isLoading = ref(false)
+
+const { channel, realtime } = useAbly({
+  isLoading,
   channelName: 'chat:main',
   eventName: 'message',
   history: {
