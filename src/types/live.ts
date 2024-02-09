@@ -12,8 +12,12 @@ type Team = {
   name: string
   slug: string
   shortName: string
-  nameCode: string
-  logoUrl: string
+  abbr: string
+  arenaName: string
+  arenaSize: number
+  color: string
+  secondaryColor: string
+  logo: string
 }
 type Time = {
   played: number
@@ -27,27 +31,14 @@ type Status = {
   description: string
   type: string
 }
-type Season = {
-  name: string
-  year: string
-  id: number
-}
-type Tournament = {
-  name: string
-  id: number
-}
 export type GameUpdate = {
-  tournament: Tournament
-  season: Season
+  id: number
   status: Status
   homeTeam: Team
   awayTeam: Team
   homeScore: Score
   awayScore: Score
   time: Time
-  id: number
-  startTimestamp: number
-  slug: string
 }
 export type LiveMessageData = {
   eventIDs: number[],

@@ -31,6 +31,13 @@ const historyHandler = (historyItems: Ably.Types.Message[]) => {
 
 const isLoading = ref(false)
 
+const CardBackground = [
+  '#C31E3A',
+  '#542583',
+  '#046A45',
+  '#002962'
+]
+
 if (props.isDebug) {
   historyHandler([
     {
@@ -40,17 +47,19 @@ if (props.isDebug) {
           {
             id: 1,
             status: {
-              description: '1st quarter'
+              description: '2nd quarter'
             },
             homeTeam: {
-              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/ind.png',
-              shortName: 'Pacers',
-              nameCode: 'IND'
+              logo: 'https://a.espncdn.com/i/teamlogos/nba/500/wsh.png',
+              arenaName: 'Capital One Arena',
+              shortName: 'Wizards',
+              abbr: 'WAS'
             },
             awayTeam: {
-              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png',
-              shortName: 'Warriors',
-              nameCode: 'GSW'
+              logo: 'https://a.espncdn.com/i/teamlogos/nba/500/ny.png',
+              arenaName: 'Madison Square Garden',
+              shortName: 'Knicks',
+              abbr: 'NYK'
             },
             homeScore: {
               current: 34
@@ -71,14 +80,16 @@ if (props.isDebug) {
               description: 'Overtime'
             },
             homeTeam: {
-              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/orl.png',
-              shortName: 'Magic',
-              nameCode: 'ORL'
+              logo: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+              arenaName: 'Crypto.com Arena',
+              shortName: 'Lakers',
+              abbr: 'LAL'
             },
             awayTeam: {
-              logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/sa.png',
-              shortName: 'Spurs',
-              nameCode: 'SAS'
+              logo: 'https://a.espncdn.com/i/teamlogos/nba/500/atl.png',
+              arenaName: 'State Farm Arena',
+              shortName: 'Hawks',
+              abbr: 'ATL'
             },
             homeScore: {
               current: 123
@@ -88,6 +99,36 @@ if (props.isDebug) {
             },
             time: {
               played: 4 * 720 + 100,
+              periodLength: 720,
+              overtimeLength: 300,
+              totalPeriodCount: 4
+            }
+          },
+          {
+            id: 3,
+            status: {
+              description: '3rd quarter'
+            },
+            homeTeam: {
+              logo: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
+              arenaName: 'TD Garden',
+              shortName: 'Celtics',
+              abbr: 'BOS'
+            },
+            awayTeam: {
+              logo: 'https://a.espncdn.com/i/teamlogos/nba/500/mem.png',
+              arenaName: 'FedExForum',
+              shortName: 'Grizzlies',
+              abbr: 'MEM'
+            },
+            homeScore: {
+              current: 99
+            },
+            awayScore: {
+              current: 88
+            },
+            time: {
+              played: 2 * 720 + 10,
               periodLength: 720,
               overtimeLength: 300,
               totalPeriodCount: 4
@@ -114,31 +155,25 @@ if (props.isDebug) {
   })
 }
 
-const timePlayed = (time: GameUpdate['time']) => {
+const gameTime = (time: GameUpdate['time']) => {
   const isOvertime = time.played > time.totalPeriodCount * time.periodLength
+  const period = isOvertime
+    ? 0
+    : Math.ceil(time.played / time.periodLength)
   const totalSeconds = isOvertime
-    ? time.played - time.periodLength * time.totalPeriodCount
-    : time.played % time.periodLength
+    ? time.overtimeLength - (time.played - time.periodLength * time.totalPeriodCount)
+    : time.periodLength - time.played % time.periodLength
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
   const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
-  return `${minutes}:${secondsWithLeadingZero}`
+  const periodLabel = period ? `Q${period}` : 'OT'
+  return `${periodLabel} ${minutes}:${secondsWithLeadingZero}`
 }
-// const timeLeft = (time: GameUpdate['time']) => {
-//   const isOvertime = time.played > time.totalPeriodCount * time.periodLength
-//   const totalSeconds = isOvertime
-//     ? time.overtimeLength - (time.played - time.periodLength * time.totalPeriodCount)
-//     : time.periodLength - time.played % time.periodLength
-//   const minutes = Math.floor(totalSeconds / 60)
-//   const seconds = totalSeconds % 60
-//   const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
-//   return `${minutes}:${secondsWithLeadingZero}`
-// }
 
 </script>
 
 <template>
-  <div class="p-2 lg:p-5 w-full flex flex-column align-items-center gap-2">
+  <div class="p-2 w-full max-w-25rem mx-auto flex flex-column align-items-center gap-2">
     <template v-if="isLoading">
       <div
         v-for="_,idx in Array(5)"
@@ -162,35 +197,51 @@ const timePlayed = (time: GameUpdate['time']) => {
     </template>
     <template v-else>
       <h2 v-if="!recentUpdates.length" class="mt-4 lg:mt-8 text-gray-400 select-none">
-        No live matches at the moment
+        No live matches
       </h2>
       <template v-for="ev,idx of recentUpdates" :key="idx">
         <article
-          class="w-12 lg:w-6 flex justify-content-between align-items-start surface-50 border-round-xl p-2 select-none"
+          class="w-12 flex justify-content-between align-items-start select-none"
+          :style="{
+            'background-color': CardBackground[idx % CardBackground.length],
+            'margin-top': idx ? '-35px' : 0,
+            'height': idx < recentUpdates.length-1 ? '120px' : '95px',
+            'border-radius': '12px'
+          }"
         >
-          <section class="w-3 flex flex-column align-items-center">
-            <img v-if="ev.homeTeam.logoUrl" :src="ev.homeTeam.logoUrl" class="h-5rem sm:h-3rem">
-            <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
-            <h5 class="text-gray-300 text-center">
-              {{ ev.homeTeam.shortName }}
+          <section class="team">
+            <img v-if="ev.awayTeam.logo" :src="ev.awayTeam.logo" class="team-logo">
+            <img v-else src="@/assets/basketball-svgrepo-com.svg" class="team-logo">
+            <h5 class="team-name">
+              {{ ev.awayTeam.abbr }}
             </h5>
           </section>
-          <section class="flex-grow flex flex-column align-items-center">
-            <h1 class="m-0 text-6xl sm:text-4xls text-color-primary">
-              {{ ev.homeScore.current }}:{{ ev.awayScore.current }}
-            </h1>
-            <h2 class="my-2 font-light text-color-secondary">
-              {{ ev.status.description }}
-            </h2>
-            <h3 class="my-1 font-light text-gray-400">
-              {{ timePlayed(ev.time) }}
-            </h3>
+          <section class="score">
+            <span class="score-text">
+              {{ ev.awayScore.current }}
+            </span>
           </section>
-          <section class="w-3 flex flex-column align-items-center">
-            <img v-if="ev.awayTeam.logoUrl" :src="ev.awayTeam.logoUrl" class="h-5rem sm:h-3rem">
-            <img v-else src="@/assets/basketball-svgrepo-com.svg" class="h-5rem sm:h-3rem">
-            <h5 class="text-gray-300 text-center">
-              {{ ev.awayTeam.shortName }}
+          <section class="status">
+            <div class="status-live">
+              <span>live</span>
+            </div>
+            <div class="status-time">
+              <span>{{ gameTime(ev.time) }}</span>
+            </div>
+            <div class="status-arena">
+              <span>{{ ev.homeTeam.arenaName }}</span>
+            </div>
+          </section>
+          <section class="score">
+            <span class="score-text">
+              {{ ev.homeScore.current }}
+            </span>
+          </section>
+          <section class="team">
+            <img v-if="ev.homeTeam.logo" :src="ev.homeTeam.logo" class="team-logo">
+            <img v-else src="@/assets/basketball-svgrepo-com.svg" class="team-logo">
+            <h5 class="team-name">
+              {{ ev.homeTeam.abbr }}
             </h5>
           </section>
         </article>
@@ -198,3 +249,69 @@ const timePlayed = (time: GameUpdate['time']) => {
     </template>
   </div>
 </template>
+
+<style lang="scss" scoped>
+
+  .team {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+    width: 80px;
+    .team-logo {
+      margin-top: 20px;
+      width: 36px;
+    }
+    .team-name {
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 16px;
+      letter-spacing: 0em;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+  }
+  .score {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .score-text {
+      margin-top: 36px;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 26px;
+      color: white;
+    }
+  }
+  .status {
+    flex: 1 0 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 6px;
+    .status-live {
+      margin-top: 20px;
+      text-transform: uppercase;
+      font-size: 10px;
+      background: #FFFFFF4A;
+      color: #FFFFFF;
+      padding: 2px 6px;
+      border-radius: 12px;
+    }
+    .status-arena {
+      font-size: 10px;
+      font-weight: 400;
+      line-height: 13px;
+      color: #FFFFFF82;
+    }
+    .status-time {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+  }
+</style>
