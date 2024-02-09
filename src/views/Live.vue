@@ -159,7 +159,7 @@ const gameTime = (time: GameUpdate['time']) => {
   const isOvertime = time.played > time.totalPeriodCount * time.periodLength
   const period = isOvertime
     ? 0
-    : Math.ceil(time.played / time.periodLength)
+    : Math.floor(time.played / time.periodLength) + 1
   const totalSeconds = isOvertime
     ? time.overtimeLength - (time.played - time.periodLength * time.totalPeriodCount)
     : time.periodLength - time.played % time.periodLength
