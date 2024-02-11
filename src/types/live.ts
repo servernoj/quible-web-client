@@ -24,7 +24,7 @@ type Time = {
   periodLength: number
   overtimeLength: number
   totalPeriodCount: number
-  currentPeriodStartTimestamp?: number
+  currentPeriodStartTimestamp: number
 }
 type Status = {
   code: number
@@ -39,6 +39,7 @@ export type GameUpdate = {
   homeScore: Score
   awayScore: Score
   time: Time
+  startTimestamp: number
 }
 export type LiveMessageData = {
   eventIDs: number[],

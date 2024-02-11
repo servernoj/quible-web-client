@@ -155,20 +155,37 @@ if (props.isDebug) {
   })
 }
 
-const gameTime = (time: GameUpdate['time']) => {
-  const isOvertime = time.played > time.totalPeriodCount * time.periodLength
-  const period = isOvertime
-    ? 0
-    : Math.floor(time.played / time.periodLength) + 1
-  const totalSeconds = isOvertime
-    ? time.overtimeLength - (time.played - time.periodLength * time.totalPeriodCount)
-    : time.periodLength - time.played % time.periodLength
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
-  const periodLabel = period ? `Q${period}` : 'OT'
-  return `${periodLabel} ${minutes}:${secondsWithLeadingZero}`
+type MetaItem = {
+  currentPeriod: number
 }
+
+const getGameClock = () => {
+  const metaData = {} as Record<number, MetaItem>
+  const statusFirstQuarterCode = 13
+  const statusOvertimeCode = 40
+  return (gameUpdate: GameUpdate) => {
+    const time = gameUpdate.time
+    const {
+      currentPeriod
+    } = metaData[gameUpdate.id] ?? {}
+    const period = gameUpdate.status.code === 30
+      ? currentPeriod ?? '?'
+      : gameUpdate.status.code - statusFirstQuarterCode + 1
+    const isOvertime = gameUpdate.status.code === statusOvertimeCode
+    const totalSeconds = isOvertime
+      ? time.overtimeLength - (time.played % (time.periodLength * time.totalPeriodCount))
+      : time.periodLength - time.played % time.periodLength
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
+    const periodLabel = isOvertime ? 'OT' : `Q${period}`
+    metaData[gameUpdate.id] = {
+      currentPeriod: period
+    }
+    return `${periodLabel} ${minutes}:${secondsWithLeadingZero}`
+  }
+}
+const gameTime = getGameClock()
 
 </script>
 
@@ -226,7 +243,7 @@ const gameTime = (time: GameUpdate['time']) => {
               <span>live</span>
             </div>
             <div class="status-time">
-              <span>{{ gameTime(ev.time) }}</span>
+              <span>{{ gameTime(ev) }}</span>
             </div>
             <div class="status-arena">
               <span>{{ ev.homeTeam.arenaName }}</span>
