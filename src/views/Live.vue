@@ -163,11 +163,12 @@ const getGameClock = () => {
   const metaData = {} as Record<number, MetaItem>
   const statusFirstQuarterCode = 13
   const statusOvertimeCode = 40
+  const statusPauseCode = 30
   return (gameUpdate: GameUpdate) => {
     const time = gameUpdate.time
-    const meta = metaData?.[gameUpdate.id] ?? {}
+    const meta = metaData[gameUpdate.id] ?? {}
     const isOvertime = gameUpdate.status.code === statusOvertimeCode
-    const isPaused = gameUpdate.status.code === 30
+    const isPaused = gameUpdate.status.code === statusPauseCode
     const currentPeriod = isPaused
       ? meta.currentPeriod
       : gameUpdate.status.code - statusFirstQuarterCode + 1
