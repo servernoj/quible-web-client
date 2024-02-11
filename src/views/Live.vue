@@ -165,22 +165,27 @@ const getGameClock = () => {
   const statusOvertimeCode = 40
   return (gameUpdate: GameUpdate) => {
     const time = gameUpdate.time
-    const {
-      currentPeriod
-    } = metaData[gameUpdate.id] ?? {}
-    const period = gameUpdate.status.code === 30
-      ? currentPeriod ?? '?'
-      : gameUpdate.status.code - statusFirstQuarterCode + 1
+    const meta = metaData?.[gameUpdate.id] ?? {}
     const isOvertime = gameUpdate.status.code === statusOvertimeCode
+    const isPaused = gameUpdate.status.code === 30
+    const currentPeriod = isPaused
+      ? meta.currentPeriod
+      : gameUpdate.status.code - statusFirstQuarterCode + 1
+    const periodLabel = isOvertime
+      ? 'OT'
+      : isPaused
+        ? typeof currentPeriod !== 'undefined'
+          ? `Q${currentPeriod + 1}`
+          : 'Q?'
+        : `Q${currentPeriod}`
     const totalSeconds = isOvertime
       ? time.overtimeLength - (time.played % (time.periodLength * time.totalPeriodCount))
       : time.periodLength - time.played % time.periodLength
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
     const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
-    const periodLabel = isOvertime ? 'OT' : `Q${period}`
     metaData[gameUpdate.id] = {
-      currentPeriod: period
+      currentPeriod
     }
     return `${periodLabel} ${minutes}:${secondsWithLeadingZero}`
   }
