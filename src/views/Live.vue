@@ -155,43 +155,45 @@ if (props.isDebug) {
   })
 }
 
-type MetaItem = {
-  currentPeriod: number
-}
-
-const getGameClock = () => {
-  const metaData = {} as Record<number, MetaItem>
-  const statusFirstQuarterCode = 13
+const getGameStatus = () => {
+  const statusQuarterCodes = [13, 14, 15, 16]
   const statusOvertimeCode = 40
   const statusPauseCode = 30
-  return (gameUpdate: GameUpdate) => {
-    const time = gameUpdate.time
-    const meta = metaData[gameUpdate.id] ?? {}
-    const isOvertime = gameUpdate.status.code === statusOvertimeCode
-    const isPaused = gameUpdate.status.code === statusPauseCode
-    const currentPeriod = isPaused
-      ? meta.currentPeriod
-      : gameUpdate.status.code - statusFirstQuarterCode + 1
-    const periodLabel = isOvertime
+  // status.code are defined as
+  // - 13,14,15,16 for quarters,
+  // - 30 for pause in between periods,
+  // - 40 for overtime
+  const fn = {
+    isPaused: (code: number) => code === statusPauseCode,
+    isOvertime: (code: number) => code === statusOvertimeCode,
+    isQuarter: (code: number) => (
+      typeof code !== 'undefined' &&
+      statusQuarterCodes.includes(code)
+    ),
+    getQuarter: (code: number) => code - statusQuarterCodes[0] + 1
+  }
+  const cache = {} as Record<number, {code: number}>
+  return ({ id, time, status: { code } }: GameUpdate) => {
+    const oldCode = cache[id]?.code
+    const periodLabel = fn.isOvertime(code)
       ? 'OT'
-      : isPaused
-        ? typeof currentPeriod !== 'undefined'
-          ? `Q${currentPeriod + 1}`
+      : fn.isPaused(code)
+        ? fn.isQuarter(oldCode)
+          ? `Q${fn.getQuarter(oldCode) + 1}`
           : 'Q?'
-        : `Q${currentPeriod}`
-    const totalSeconds = isOvertime
-      ? time.overtimeLength - (time.played % (time.periodLength * time.totalPeriodCount))
+        : `Q${fn.getQuarter(code)}`
+    cache[id] = { code }
+    const totalSeconds = fn.isOvertime(code)
+      ? time.overtimeLength - time.played % (time.periodLength * time.totalPeriodCount)
       : time.periodLength - time.played % time.periodLength
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = totalSeconds % 60
     const secondsWithLeadingZero = seconds < 10 ? `0${seconds}` : seconds
-    metaData[gameUpdate.id] = {
-      currentPeriod
-    }
     return `${periodLabel} ${minutes}:${secondsWithLeadingZero}`
   }
 }
-const gameTime = getGameClock()
+
+const gameStatus = getGameStatus()
 
 </script>
 
@@ -249,7 +251,7 @@ const gameTime = getGameClock()
               <span>live</span>
             </div>
             <div class="status-time">
-              <span>{{ gameTime(ev) }}</span>
+              <span>{{ gameStatus(ev) }}</span>
             </div>
             <div class="status-arena">
               <span>{{ ev.homeTeam.arenaName }}</span>
