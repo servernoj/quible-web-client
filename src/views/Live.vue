@@ -182,7 +182,9 @@ const getGameStatus = () => {
           ? `Q${fn.getQuarter(oldCode) + 1}`
           : 'Q?'
         : `Q${fn.getQuarter(code)}`
-    cache[id] = { code }
+    if (fn.isQuarter(code)) {
+      cache[id] = { code }
+    }
     const totalSeconds = fn.isOvertime(code)
       ? time.overtimeLength - time.played % (time.periodLength * time.totalPeriodCount)
       : time.periodLength - time.played % time.periodLength
