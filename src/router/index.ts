@@ -58,11 +58,14 @@ const router = createRouter({
       component: () => import('@/views/forms/PasswordReset.vue')
     },
     {
+      path: '/forms/register',
+      component: () => import('@/views/forms/UserRegistration.vue')
+    },
+    {
       path: '/:pathMatch(.*)',
       name: 'not-found',
       component: Error
     }
-
   ]
 })
 
