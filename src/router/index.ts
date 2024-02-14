@@ -25,12 +25,12 @@ const router = createRouter({
       props: (route) => ({ isDebug: typeof route.query.debug !== 'undefined' && !/^false$/i.test(route.query.debug as string) }),
       component: () => import('@/views/Live.vue')
     },
-    {
-      path: '/chat',
-      name: 'chat',
-      component: () => import('@/views/Chat.vue'),
-      meta: { requiresAuth: true }
-    },
+    // {
+    //   path: '/chat',
+    //   name: 'chat',
+    //   component: () => import('@/views/Chat.vue'),
+    //   meta: { requiresAuth: true }
+    // },
     {
       path: '/login',
       name: 'login',

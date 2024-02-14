@@ -10,9 +10,11 @@ import { RouterLink } from 'vue-router'
     <RouterLink :to="{name: 'live'}">
       Live
     </RouterLink>
+    <!--
     <RouterLink :to="{name: 'chat'}">
       Chat
     </RouterLink>
+    -->
     <RouterLink :to="{name: 'error', query: {kind: 401}}">
       Error
     </RouterLink>
